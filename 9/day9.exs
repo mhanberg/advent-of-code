@@ -72,6 +72,5 @@ new_length = l
   |> String.replace_trailing("\n", "")
   |> String.length
 
-
 (orig_length - new_length)
   |> IO.inspect
