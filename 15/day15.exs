@@ -24,10 +24,10 @@ end
   1..40_000_000
   |> Enum.reduce({0, 591, 393}, fn(x, {acc, next_a, next_b}) ->
     a = Day15.gen_a(next_a)
-    bin_a = a |> Integer.to_charlist(2) |> to_string |> String.pad_leading(32, "0")
+    bin_a = a |> Integer.to_charlist(2) |> to_string
 
     b = Day15.gen_b(next_b)
-    bin_b = b |> Integer.to_charlist(2) |> to_string |> String.pad_leading(32, "0")
+    bin_b = b |> Integer.to_charlist(2) |> to_string
 
     eq = Day15.compare(bin_a, bin_b)
 
