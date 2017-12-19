@@ -50,5 +50,3 @@ input =
   end)
 
 Day19.move(:down, {131, 0}, input, {[], 0}) |> IO.inspect
-
-# IO.inspect input[{ 131, 0 }]
