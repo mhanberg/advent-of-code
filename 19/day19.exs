@@ -1,34 +1,34 @@
 defmodule Day19 do
-  def move(:down, {x, y}, graph, acc) do
+  def move(:down, {x, y}, graph, {acc, c}) do
     case graph[{x, y + 1}] do
-      "+" -> if graph[{x+1, y+1}] != nil, do: move(:right, {x + 1, y + 1}, graph, acc), else: move(:left, {x - 1, y + 1}, graph, acc)
-      nil -> acc
-      letter when letter != "|" and letter != "-" and letter != "+" -> move(:down, {x, y + 1}, graph, acc ++ [letter])
-      _ -> move(:down, {x, y + 1}, graph, acc)
+      "+" -> if graph[{x+1, y+1}] != nil, do: move(:right, {x + 1, y + 1}, graph, {acc, c + 2}), else: move(:left, {x - 1, y + 1}, graph, {acc, c + 2})
+      nil -> {acc, c + 1}
+      letter when letter != "|" and letter != "-" and letter != "+" -> move(:down, {x, y + 1}, graph, {acc ++ [letter], c + 1})
+      _ -> move(:down, {x, y + 1}, graph, {acc, c + 1})
     end
   end
-  def move(:up, {x, y}, graph, acc) do
+  def move(:up, {x, y}, graph, {acc, c}) do
     case graph[{x, y - 1}] do
-      "+" -> if graph[{x+1, y-1}] != nil, do: move(:right, {x + 1, y - 1}, graph, acc), else: move(:left, {x - 1, y - 1}, graph, acc)
-      nil -> acc
-      letter when letter != "|" and letter != "-" and letter != "+" -> move(:up, {x, y - 1}, graph, acc ++ [letter])
-      _ -> move(:up, {x, y - 1}, graph, acc)
+      "+" -> if graph[{x+1, y-1}] != nil, do: move(:right, {x + 1, y - 1}, graph, {acc, c + 2}), else: move(:left, {x - 1, y - 1}, graph, {acc, c + 2})
+      nil -> {acc, c + 1}
+      letter when letter != "|" and letter != "-" and letter != "+" -> move(:up, {x, y - 1}, graph, {acc ++ [letter], c + 1})
+      _ -> move(:up, {x, y - 1}, graph, {acc, c + 1})
     end
   end
-  def move(:left, {x, y}, graph, acc) do
+  def move(:left, {x, y}, graph, {acc, c}) do
     case graph[{x - 1, y}] do
-      "+" -> if graph[{x-1, y+1}] != nil, do: move(:down, {x - 1, y + 1}, graph, acc), else: move(:up, {x - 1, y - 1}, graph, acc)
-      nil -> acc
-      letter when letter != "|" and letter != "-" and letter != "+" -> move(:left, {x - 1, y}, graph, acc ++ [letter])
-      _ -> move(:left, {x - 1, y}, graph, acc)
+      "+" -> if graph[{x-1, y+1}] != nil, do: move(:down, {x - 1, y + 1}, graph, {acc, c + 2}), else: move(:up, {x - 1, y - 1}, graph, {acc, c + 2})
+      nil -> {acc, c + 1}
+      letter when letter != "|" and letter != "-" and letter != "+" -> move(:left, {x - 1, y}, graph, {acc ++ [letter], c + 1})
+      _ -> move(:left, {x - 1, y}, graph, {acc, c + 1})
     end
   end
-  def move(:right, {x, y}, graph, acc) do
+  def move(:right, {x, y}, graph, {acc, c}) do
     case graph[{x + 1, y}] do
-      "+" -> if graph[{x+1, y+1}] != nil, do: move(:down, {x + 1, y + 1}, graph, acc), else: move(:up, {x + 1, y - 1}, graph, acc)
-      nil -> acc
-      letter when letter != "|" and letter != "-" and letter != "+" -> move(:right, {x + 1, y}, graph, acc ++ [letter])
-      _ -> move(:right, {x + 1, y}, graph, acc)
+      "+" -> if graph[{x+1, y+1}] != nil, do: move(:down, {x + 1, y + 1}, graph, {acc, c + 2}), else: move(:up, {x + 1, y - 1}, graph, {acc, c + 2})
+      nil -> {acc, c + 1}
+      letter when letter != "|" and letter != "-" and letter != "+" -> move(:right, {x + 1, y}, graph, {acc ++ [letter], c + 1})
+      _ -> move(:right, {x + 1, y}, graph, {acc, c + 1})
     end
   end
 end
@@ -49,6 +49,6 @@ input =
     end)
   end)
 
-Day19.move(:down, {131, 0}, input, []) |> Enum.join |> IO.inspect
+Day19.move(:down, {131, 0}, input, {[], 0}) |> IO.inspect
 
 # IO.inspect input[{ 131, 0 }]
