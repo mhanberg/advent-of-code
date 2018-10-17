@@ -1,5 +1,5 @@
-# Advent of Code 2017
+# Advent of Code
 
-My answers to the Advent of Code 2017 challenges, in Elixir and Crystal!
+My answers to the Advent of Code challenges.
 
 [Advent of Code](http://adventofcode.com/)
