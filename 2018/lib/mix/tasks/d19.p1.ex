@@ -9,6 +9,6 @@ defmodule Mix.Tasks.D19.P1 do
 
     input
     |> part1()
-    |> IO.inspect(label: "Part 1 Results") 
+    |> IO.inspect(label: "Part 1 Results")
   end
-end   
+end
