@@ -1,12 +1,17 @@
 defmodule AdventOfCode2018.Day01 do
   def part1(args) do
     args
+    |> Stream.map(fn x -> x |> String.trim |> String.to_integer end)
     |> Enum.reduce(0, fn x, acc ->
-      acc + String.to_integer(x)
+      acc + x
     end)
   end
 
   def part2(args) do
+    args = args
+      |> Stream.map(fn x -> x |> String.trim |> String.to_integer end)
+      |> Enum.to_list
+
     find_dup(args, {0, Map.new}, args)
   end
 
@@ -16,7 +21,7 @@ defmodule AdventOfCode2018.Day01 do
 
   defp find_dup(args, {acc, cycle_list}, full_args) do
     [x | tail] = args
-    new_acc = acc + String.to_integer(x)
+    new_acc = acc + x
 
     if Map.has_key?(cycle_list, new_acc) do
       new_acc
