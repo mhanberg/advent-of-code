@@ -5,7 +5,8 @@ defmodule Mix.Tasks.D02.P2 do
 
   @shortdoc "Day 02 Part 2"
   def run(_) do
-    input = nil
+    input = File.stream!("priv/day02/input.txt")
+            |> Stream.map(fn x -> String.trim(x) end)
 
     input
     |> part2()
