@@ -2,10 +2,9 @@ defmodule AdventOfCode2018.Day02 do
   def part1(args) do
     {two, three} =
       args
-      |> Enum.map(fn id ->
-        ids = id
-        |> String.split("")
-        |> Enum.reject(fn x -> x == "" end)
+      |> Stream.map(fn id ->
+        ids = String.split(id, "", trim: true)
+
         ids
         |> Enum.group_by(fn id ->
           ids
@@ -13,8 +12,8 @@ defmodule AdventOfCode2018.Day02 do
         end)
       end)
       |> Enum.reduce({0, 0}, fn x, {two, three} ->
-        two = two + (x[2] && 1 || 0) 
-        three = three + (x[3] && 1 || 0)
+        two = two + ((x[2] && 1) || 0)
+        three = three + ((x[3] && 1) || 0)
 
         {two, three}
       end)
@@ -24,17 +23,19 @@ defmodule AdventOfCode2018.Day02 do
 
   def part2(args) do
     args
-    |> Enum.map(fn id ->
+    |> Stream.map(fn id ->
       args
-      |> Enum.reject(fn x -> x == id end)
-      |> Enum.map(fn x -> String.myers_difference(id, x) end)
-      |> Enum.filter(fn x -> Keyword.has_key?(x, :eq) end)
-      |> Enum.filter(fn x -> Enum.count(x) == 4 end)
-      |> List.flatten
+      |> Stream.reject(fn x -> x == id end)
+      |> Stream.map(fn x -> String.myers_difference(id, x) end)
+      |> Stream.filter(fn x -> Keyword.has_key?(x, :eq) end)
+      |> Stream.filter(fn x -> Enum.count(x) == 4 end)
+      |> Enum.to_list()
+      |> List.flatten()
     end)
-    |> Enum.reject(fn x -> Enum.empty? x end)
-    |> List.first
+    |> Stream.reject(fn x -> Enum.empty?(x) end)
+    |> Enum.to_list()
+    |> List.first()
     |> Keyword.get_values(:eq)
-    |> Enum.join
+    |> Enum.join()
   end
 end

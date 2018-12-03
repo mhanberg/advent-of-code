@@ -7,8 +7,8 @@ defmodule Mix.Tasks.D02.P1 do
   def run(_) do
     input = File.stream!("priv/day02/input.txt")
 
-    input
-    |> part1()
-    |> IO.inspect(label: "Part 1 Results")
+    input |> part1() |> IO.inspect(label: "Part 1 Results")
+
+    Benchee.run(%{part_1: fn -> input |> part1() end})
   end
 end

@@ -5,11 +5,12 @@ defmodule Mix.Tasks.D02.P2 do
 
   @shortdoc "Day 02 Part 2"
   def run(_) do
-    input = File.stream!("priv/day02/input.txt")
-            |> Stream.map(fn x -> String.trim(x) end)
+    input =
+      File.stream!("priv/day02/input.txt")
+      |> Stream.map(fn x -> String.trim(x) end)
 
-    input
-    |> part2()
-    |> IO.inspect(label: "Part 2 Results")
+    input |> part2() |> IO.inspect(label: "Part 2 Results")
+
+    Benchee.run(%{part_2: fn -> input |> part2() end})
   end
 end

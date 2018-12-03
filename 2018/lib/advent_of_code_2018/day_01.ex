@@ -1,18 +1,19 @@
 defmodule AdventOfCode2018.Day01 do
   def part1(args) do
     args
-    |> Stream.map(fn x -> x |> String.trim |> String.to_integer end)
+    |> Stream.map(fn x -> x |> String.trim() |> String.to_integer() end)
     |> Enum.reduce(0, fn x, acc ->
       acc + x
     end)
   end
 
   def part2(args) do
-    args = args
-      |> Stream.map(fn x -> x |> String.trim |> String.to_integer end)
-      |> Enum.to_list
+    args =
+      args
+      |> Stream.map(fn x -> x |> String.trim() |> String.to_integer() end)
+      |> Enum.to_list()
 
-    find_dup(args, {0, Map.new}, args)
+    find_dup(args, {0, Map.new()}, args)
   end
 
   defp find_dup([], acc, full_args) do
