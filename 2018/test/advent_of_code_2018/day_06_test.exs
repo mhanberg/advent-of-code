@@ -3,19 +3,37 @@ defmodule AdventOfCode2018.Day06Test do
 
   import AdventOfCode2018.Day06
 
-  @tag :skip
   test "part1" do
-    input = nil
+    input =
+      """
+      1, 1
+      1, 6
+      8, 3
+      3, 4
+      5, 5
+      8, 9
+      """
+      |> String.split("\n", trim: true)
+
     result = part1(input)
 
-    assert result
+    assert result == 17
   end
 
-  @tag :skip
   test "part2" do
-    input = nil
-    result = part2(input)
+    input =
+      """
+      1, 1
+      1, 6
+      8, 3
+      3, 4
+      5, 5
+      8, 9
+      """
+      |> String.split("\n", trim: true)
 
-    assert result
+    result = part2(input, 32)
+
+    assert result == 16
   end
 end
