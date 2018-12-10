@@ -5,10 +5,14 @@ defmodule Mix.Tasks.D08.P1 do
 
   @shortdoc "Day 08 Part 1"
   def run(_) do
-    input = nil
+    input = File.read!("priv/day08/input.txt")
 
     input
     |> part1()
     |> IO.inspect(label: "Part 1 Results")
+
+    Benchee.run(%{
+      "part1" => fn -> part1(input) end
+    })
   end
 end
