@@ -3,19 +3,11 @@ defmodule AdventOfCode2018.Day09Test do
 
   import AdventOfCode2018.Day09
 
-  @tag :skip
   test "part1" do
-    input = nil
-    result = part1(input)
+    inputs = [{9, 25}, {10, 1618}, {13, 7999}, {17, 1104}, {21, 6111}, {30, 5807}]
+    actuals = [32, 8317, 146_373, 2764, 54718, 37305]
+    results = Enum.map(inputs, &part1/1)
 
-    assert result
-  end
-
-  @tag :skip
-  test "part2" do
-    input = nil
-    result = part2(input)
-
-    assert result
+    assert results == actuals
   end
 end

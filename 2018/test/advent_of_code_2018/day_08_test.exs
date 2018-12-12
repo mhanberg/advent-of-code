@@ -6,8 +6,7 @@ defmodule AdventOfCode2018.Day08Test do
   test "part1" do
     input = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"
 
-    result =
-      part1(input)
+    result = part1(input)
 
     assert result == 138
   end

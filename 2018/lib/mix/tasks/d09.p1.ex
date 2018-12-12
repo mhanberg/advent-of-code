@@ -5,7 +5,7 @@ defmodule Mix.Tasks.D09.P1 do
 
   @shortdoc "Day 09 Part 1"
   def run(_) do
-    input = nil
+    input = {458, 72019}
 
     input
     |> part1()
