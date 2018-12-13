@@ -5,7 +5,10 @@ defmodule Mix.Tasks.D10.P1 do
 
   @shortdoc "Day 10 Part 1"
   def run(_) do
-    input = nil
+    input =
+      File.stream!("priv/day10/input.txt")
+      |> Stream.map(&String.trim/1)
+      |> Stream.uniq()
 
     input
     |> part1()
