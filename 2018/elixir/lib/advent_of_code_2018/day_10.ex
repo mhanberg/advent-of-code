@@ -97,4 +97,6 @@ defmodule AdventOfCode2018.Day10 do
 
     map
   end
+
+  def part2(_), do: nil
 end
