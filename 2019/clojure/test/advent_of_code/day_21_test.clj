@@ -1,4 +1,4 @@
-(ns advent-of-code.core-test
+(ns advent-of-code.day-21-test
   (:require [clojure.test :refer [deftest testing is]]
             [advent-of-code.day-21 :refer [part-1 part-2]]
             [clojure.java.io :refer [resource]]))
