@@ -23,7 +23,8 @@
             [advent-of-code.day-22]
             [advent-of-code.day-23]
             [advent-of-code.day-24]
-            [advent-of-code.day-25]))
+            [advent-of-code.day-25]
+            [advent-of-code.utils :as utils]))
 
 (defn read-input
   [day]
@@ -35,8 +36,8 @@
   lein run d01.p1"
   [part]
   (case part
-    "d01.p1" (println (advent-of-code.day-01/part-1 (read-input "day-01.txt")))
-    "d01.p2" (println (advent-of-code.day-01/part-2 (read-input "day-01.txt")))
+    "d01.p1" (println (advent-of-code.day-01/part-1 (utils/resource-to-int-list "day-01.txt")))
+    "d01.p2" (println (advent-of-code.day-01/part-2 (utils/resource-to-int-list "day-01.txt")))
     "d02.p1" (println (advent-of-code.day-02/part-1 (read-input "day-02.txt")))
     "d02.p2" (println (advent-of-code.day-02/part-2 (read-input "day-02.txt")))
     "d03.p1" (println (advent-of-code.day-03/part-1 (read-input "day-03.txt")))
