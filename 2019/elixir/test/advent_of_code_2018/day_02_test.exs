@@ -3,12 +3,16 @@ defmodule AdventOfCode2019.Day02Test do
 
   import AdventOfCode2019.Day02
 
-  @tag :skip
   test "part1" do
-    input = nil
+    input = Utils.input_split_by("day_02_example.txt", ",", &String.to_integer/1)
     result = part1(input)
 
-    assert result
+    assert result ==
+             [2, 3, 0, 6, 99]
+             |> Enum.with_index()
+             |> Enum.reduce(Map.new(), fn {opcode, i}, map ->
+               Map.put(map, i, opcode)
+             end)
   end
 
   @tag :skip
