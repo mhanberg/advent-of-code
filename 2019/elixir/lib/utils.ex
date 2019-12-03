@@ -5,6 +5,11 @@ defmodule Utils do
     |> Stream.map(&String.to_integer/1)
   end
 
+  def read!(file) do
+    "priv/#{file}"
+    |> File.read!()
+  end
+
   def input_to_list(file) do
     "priv/#{file}"
     |> File.stream!()
