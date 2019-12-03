@@ -38,8 +38,8 @@
   (case part
     "d01.p1" (println (advent-of-code.day-01/part-1 (utils/resource-to-int-list "day-01.txt")))
     "d01.p2" (println (advent-of-code.day-01/part-2 (utils/resource-to-int-list "day-01.txt")))
-    "d02.p1" (println (advent-of-code.day-02/part-1 (read-input "day-02.txt")))
-    "d02.p2" (println (advent-of-code.day-02/part-2 (read-input "day-02.txt")))
+    "d02.p1" (println (advent-of-code.day-02/part-1 (utils/resource-to-int-list-commas "day-02.txt")))
+    "d02.p2" (println (advent-of-code.day-02/part-2 (utils/resource-to-int-list-commas "day-02.txt")))
     "d03.p1" (println (advent-of-code.day-03/part-1 (read-input "day-03.txt")))
     "d03.p2" (println (advent-of-code.day-03/part-2 (read-input "day-03.txt")))
     "d04.p1" (println (advent-of-code.day-04/part-1 (read-input "day-04.txt")))
