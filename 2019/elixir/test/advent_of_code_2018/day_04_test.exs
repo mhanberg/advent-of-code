@@ -3,9 +3,8 @@ defmodule AdventOfCode2019.Day04Test do
 
   import AdventOfCode2019.Day04
 
-  @tag :skip
   test "part1" do
-    input = nil
+    input = 256310..732736
     result = part1(input)
 
     assert result
@@ -13,7 +12,7 @@ defmodule AdventOfCode2019.Day04Test do
 
   @tag :skip
   test "part2" do
-    input = nil
+    input = 256310..732736
     result = part2(input)
 
     assert result
