@@ -3,19 +3,18 @@ defmodule AdventOfCode2019.Day06Test do
 
   import AdventOfCode2019.Day06
 
-  @tag :skip
   test "part1" do
-    input = nil
+    input = Utils.input_to_list("day_06_example.txt")
+
     result = part1(input)
 
-    assert result
+    assert result == 42
   end
 
-  @tag :skip
   test "part2" do
-    input = nil
-    result = part2(input)
+    input = Utils.input_to_list("day_06_example-2.txt")
+    result = part2(input, "YOU", "SAN")
 
-    assert result
+    assert result == 4
   end
 end
