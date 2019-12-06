@@ -1,11 +1,10 @@
-defmodule AdventOfCode2019.Day05Test do
+defmodule AdventOfCode2019.Day04Test do
   use ExUnit.Case
 
-  import AdventOfCode2019.Day05
+  import AdventOfCode2019.Day04
 
-  @tag :skip
   test "part1" do
-    input = nil
+    input = 256_310..732_736
     result = part1(input)
 
     assert result
@@ -13,7 +12,7 @@ defmodule AdventOfCode2019.Day05Test do
 
   @tag :skip
   test "part2" do
-    input = nil
+    input = 256_310..732_736
     result = part2(input)
 
     assert result
