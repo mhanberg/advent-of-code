@@ -17,23 +17,16 @@ defmodule Vm do
        pos: 0,
        neighbor: neighbor,
        name: name,
+       relative_base: 0,
        main_thread: main_thread
-     }, {:continue, :traverse_codes}}
+     }, {:continue, :execute}}
   end
 
-  def handle_continue(:traverse_codes, state) do
-    IO.inspect :continuing # this makes it work??? fuck me
+  def handle_continue(:execute, state) do
+    # this makes it work??? fuck me
+    IO.inspect(:continuing)
 
-    traversed =
-      traverse_codes(
-        state.program,
-        state.pos,
-        state.inputs,
-        state.outputs,
-        state.neighbor,
-        state.main_thread,
-        state.name
-      )
+    traversed = execute(state)
 
     new_state = Map.merge(state, traversed)
 
@@ -41,109 +34,156 @@ defmodule Vm do
   end
 
   def handle_info({:add_inputs, inputs}, state) do
-    {:noreply, %{state | inputs: state.inputs ++ inputs}, {:continue, :traverse_codes}}
+    {:noreply, %{state | inputs: state.inputs ++ inputs}, {:continue, :execute}}
   end
 
-  defp traverse_codes(opcode_map, pos, inputs, outputs, neighbor, main_thread, name) do
-    opcode_map[pos]
+  defp execute(state) do
+    state.program[state.pos]
     |> to_string()
     |> String.pad_leading(5, "0")
     |> String.split_at(-2)
     |> interpret_code()
     |> case do
       {1, mode1, mode2, mode3} ->
-        adjust_codes(opcode_map, pos, mode1, mode2, mode3, &Kernel.+/2)
-        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
+        execute(%{
+          state
+          | program: adjust_codes(state, mode1, mode2, mode3, &Kernel.+/2),
+            pos: state.pos + 4
+        })
 
       {2, mode1, mode2, mode3} ->
-        adjust_codes(opcode_map, pos, mode1, mode2, mode3, &Kernel.*/2)
-        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
+        execute(%{
+          state
+          | program: adjust_codes(state, mode1, mode2, mode3, &Kernel.*/2),
+            pos: state.pos + 4
+        })
 
-      {3, _, _, _} ->
-        if Enum.empty?(inputs) do
-          %{program: opcode_map, pos: pos, inputs: inputs, outputs: outputs}
+      {3, mode, _, _} ->
+        if Enum.empty?(state.inputs) do
+          state
         else
-          [input | rest] = inputs
-          x1 = opcode_map[pos + 1]
+          [input | rest] = state.inputs
 
-          Map.put(opcode_map, x1, input)
-          |> traverse_codes(pos + 2, rest, outputs, neighbor, main_thread, name)
+          execute(%{
+            state
+            | program:
+                Map.put(
+                  state.program,
+                  write_position(state, state.program[state.pos + 1], mode),
+                  input
+                ),
+              pos: state.pos + 2,
+              inputs: rest
+          })
         end
 
       {4, mode, _, _} ->
-        [{_, operand}] = get_operands(opcode_map, pos, 1, [mode], [])
+        [{_, operand}] = get_operands(state, 1, [mode], [])
 
-        with pid when is_pid(pid) <- Process.whereis(neighbor) do
+        with pid when is_pid(pid) <- Process.whereis(state.neighbor) do
           send(pid, {:add_inputs, [operand]})
         end
 
-        opcode_map
-        |> traverse_codes(pos + 2, inputs, [operand | outputs], neighbor, main_thread, name)
+        execute(%{
+          state
+          | pos: state.pos + 2,
+            outputs: [operand | state.outputs]
+        })
 
       {5, mode1, mode2, _} ->
-        new_pos = jump_if(opcode_map, pos, mode1, mode2, &Kernel.!=/2)
-
-        opcode_map
-        |> traverse_codes(new_pos, inputs, outputs, neighbor, main_thread, name)
+        execute(%{state | pos: jump_if(state, mode1, mode2, &Kernel.!=/2)})
 
       {6, mode1, mode2, _} ->
-        new_pos = jump_if(opcode_map, pos, mode1, mode2, &Kernel.==/2)
-
-        opcode_map
-        |> traverse_codes(new_pos, inputs, outputs, neighbor, main_thread, name)
+        execute(%{state | pos: jump_if(state, mode1, mode2, &Kernel.==/2)})
 
       {7, mode1, mode2, mode3} ->
-        opcode_map
-        |> store_if(pos, mode1, mode2, mode3, &Kernel.</2)
-        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
+        execute(%{
+          state
+          | program: store_if(state, mode1, mode2, mode3, &Kernel.</2),
+            pos: state.pos + 4
+        })
 
       {8, mode1, mode2, mode3} ->
-        opcode_map
-        |> store_if(pos, mode1, mode2, mode3, &Kernel.==/2)
-        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
+        execute(%{
+          state
+          | program: store_if(state, mode1, mode2, mode3, &Kernel.==/2),
+            pos: state.pos + 4
+        })
+
+      {9, mode, _, _} ->
+        [{_, operand}] = get_operands(state, 1, [mode], [])
+
+        execute(%{
+          state
+          | pos: state.pos + 2,
+            relative_base: state.relative_base + operand
+        })
 
       {99, _, _, _} ->
-        if name == :e, do: send(main_thread, outputs)
+        if state.name == :e, do: send(state.main_thread, state.outputs)
 
-        %{program: opcode_map, pos: pos, inputs: inputs, outputs: outputs, halted?: true}
+        %{state | halted?: true}
     end
   end
 
-  defp adjust_codes(opcode_map, pos, mode1, mode2, mode3, adjuster) do
-    [{_, operand1}, {_, operand2}, {locator3, _}] =
-      get_operands(opcode_map, pos, 1, [mode1, mode2, mode3], [])
+  defp adjust_codes(state, mode1, mode2, mode3, adjuster) do
+    [{_, operand1}, {_, operand2}, {parameter3, _}] =
+      get_operands(state, 1, [mode1, mode2, mode3], [])
 
-    Map.put(opcode_map, locator3, apply(adjuster, [operand1, operand2]))
+    Map.put(
+      state.program,
+      write_position(state, parameter3, mode3),
+      apply(adjuster, [operand1, operand2])
+    )
   end
 
-  def get_operands(_, _, _, [], operands), do: Enum.reverse(operands)
+  def get_operands(_, _, [], operands), do: Enum.reverse(operands)
 
-  def get_operands(opcode_map, pos, moving, [mode | modes], operands) do
-    locator = opcode_map[pos + moving]
-    operand = get_by_mode(opcode_map, locator, mode)
+  def get_operands(state, moving, [mode | modes], operands) do
+    parameter = state.program[state.pos + moving]
+    operand = get_by_mode(state, parameter, mode)
 
-    get_operands(opcode_map, pos, moving + 1, modes, [{locator, operand} | operands])
+    get_operands(state, moving + 1, modes, [{parameter, operand} | operands])
   end
 
-  def get_by_mode(opcode_map, locator, 0) do
-    opcode_map[locator]
+  # position
+  def get_by_mode(state, parameter, 0) do
+    state.program[parameter] || 0
   end
 
-  def get_by_mode(_, locator, 1) do
-    locator
+  # immediate
+  def get_by_mode(_, parameter, 1) do
+    parameter
   end
 
-  def jump_if(opcode_map, pos, mode1, mode2, tester) do
-    [{_, operand1}, {_, operand2}] = get_operands(opcode_map, pos, 1, [mode1, mode2], [])
-
-    if(tester.(operand1, 0), do: operand2, else: pos + 3)
+  # relative
+  def get_by_mode(state, parameter, 2) do
+    state.program[state.relative_base + parameter] || 0
   end
 
-  def store_if(opcode_map, pos, mode1, mode2, mode3, tester) do
-    [{_, operand1}, {_, operand2}, {locator3, _}] =
-      get_operands(opcode_map, pos, 1, [mode1, mode2, mode3], [])
+  def write_position(state, parameter, 0) do
+    parameter
+  end
 
-    Map.put(opcode_map, locator3, if(tester.(operand1, operand2), do: 1, else: 0))
+  def write_position(state, parameter, 2) do
+    state.relative_base + parameter
+  end
+
+  def jump_if(state, mode1, mode2, tester) do
+    [{_, operand1}, {_, operand2}] = get_operands(state, 1, [mode1, mode2], [])
+
+    if(tester.(operand1, 0), do: operand2, else: state.pos + 3)
+  end
+
+  def store_if(state, mode1, mode2, mode3, tester) do
+    [{_, operand1}, {_, operand2}, {parameter3, _}] =
+      get_operands(state, 1, [mode1, mode2, mode3], [])
+
+    Map.put(
+      state.program,
+      write_position(state, parameter3, mode3),
+      if(tester.(operand1, operand2), do: 1, else: 0)
+    )
   end
 
   def interpret_code({"", code}), do: {String.to_integer(code), 0, 0, 0}
