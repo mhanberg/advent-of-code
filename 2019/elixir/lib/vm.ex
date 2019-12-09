@@ -1,13 +1,50 @@
-defmodule AdventOfCode2019.Day05 do
-  def part1(args, input) do
-    args |> parse_args |> traverse_codes(0, input, [])
+defmodule Vm do
+  use GenServer
+
+  def start_link(name, program, inputs, outputs, neighbor, main_thread) do
+    GenServer.start_link(__MODULE__, {program, inputs, outputs, neighbor, name, main_thread},
+      name: name
+    )
   end
 
-  def part2(args, input) do
-    args |> parse_args |> traverse_codes(0, input, [])
+  def init({program, inputs, outputs, neighbor, name, main_thread}) do
+    {:ok,
+     %{
+       halted?: false,
+       program: program,
+       inputs: inputs,
+       outputs: outputs,
+       pos: 0,
+       neighbor: neighbor,
+       name: name,
+       main_thread: main_thread
+     }, {:continue, :traverse_codes}}
   end
 
-  def traverse_codes(opcode_map, pos, input, outputs) do
+  def handle_continue(:traverse_codes, state) do
+    IO.inspect :continuing # this makes it work??? fuck me
+
+    traversed =
+      traverse_codes(
+        state.program,
+        state.pos,
+        state.inputs,
+        state.outputs,
+        state.neighbor,
+        state.main_thread,
+        state.name
+      )
+
+    new_state = Map.merge(state, traversed)
+
+    {:noreply, new_state}
+  end
+
+  def handle_info({:add_inputs, inputs}, state) do
+    {:noreply, %{state | inputs: state.inputs ++ inputs}, {:continue, :traverse_codes}}
+  end
+
+  defp traverse_codes(opcode_map, pos, inputs, outputs, neighbor, main_thread, name) do
     opcode_map[pos]
     |> to_string()
     |> String.pad_leading(5, "0")
@@ -16,48 +53,59 @@ defmodule AdventOfCode2019.Day05 do
     |> case do
       {1, mode1, mode2, mode3} ->
         adjust_codes(opcode_map, pos, mode1, mode2, mode3, &Kernel.+/2)
-        |> traverse_codes(pos + 4, input, outputs)
+        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
 
       {2, mode1, mode2, mode3} ->
         adjust_codes(opcode_map, pos, mode1, mode2, mode3, &Kernel.*/2)
-        |> traverse_codes(pos + 4, input, outputs)
+        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
 
       {3, _, _, _} ->
-        x1 = opcode_map[pos + 1]
+        if Enum.empty?(inputs) do
+          %{program: opcode_map, pos: pos, inputs: inputs, outputs: outputs}
+        else
+          [input | rest] = inputs
+          x1 = opcode_map[pos + 1]
 
-        Map.put(opcode_map, x1, input)
-        |> traverse_codes(pos + 2, input, outputs)
+          Map.put(opcode_map, x1, input)
+          |> traverse_codes(pos + 2, rest, outputs, neighbor, main_thread, name)
+        end
 
       {4, mode, _, _} ->
         [{_, operand}] = get_operands(opcode_map, pos, 1, [mode], [])
 
+        with pid when is_pid(pid) <- Process.whereis(neighbor) do
+          send(pid, {:add_inputs, [operand]})
+        end
+
         opcode_map
-        |> traverse_codes(pos + 2, input, [operand | outputs])
+        |> traverse_codes(pos + 2, inputs, [operand | outputs], neighbor, main_thread, name)
 
       {5, mode1, mode2, _} ->
         new_pos = jump_if(opcode_map, pos, mode1, mode2, &Kernel.!=/2)
 
         opcode_map
-        |> traverse_codes(new_pos, input, outputs)
+        |> traverse_codes(new_pos, inputs, outputs, neighbor, main_thread, name)
 
       {6, mode1, mode2, _} ->
         new_pos = jump_if(opcode_map, pos, mode1, mode2, &Kernel.==/2)
 
         opcode_map
-        |> traverse_codes(new_pos, input, outputs)
+        |> traverse_codes(new_pos, inputs, outputs, neighbor, main_thread, name)
 
       {7, mode1, mode2, mode3} ->
         opcode_map
         |> store_if(pos, mode1, mode2, mode3, &Kernel.</2)
-        |> traverse_codes(pos + 4, input, outputs)
+        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
 
       {8, mode1, mode2, mode3} ->
         opcode_map
         |> store_if(pos, mode1, mode2, mode3, &Kernel.==/2)
-        |> traverse_codes(pos + 4, input, outputs)
+        |> traverse_codes(pos + 4, inputs, outputs, neighbor, main_thread, name)
 
       {99, _, _, _} ->
-        {opcode_map, outputs}
+        if name == :e, do: send(main_thread, outputs)
+
+        %{program: opcode_map, pos: pos, inputs: inputs, outputs: outputs, halted?: true}
     end
   end
 
@@ -107,12 +155,4 @@ defmodule AdventOfCode2019.Day05 do
 
   def interpret_modes(modes),
     do: modes |> String.split("", trim: true) |> Enum.reverse() |> Enum.map(&String.to_integer/1)
-
-  defp parse_args(args) do
-    args
-    |> Enum.with_index()
-    |> Enum.reduce(Map.new(), fn {opcode, i}, map ->
-      Map.put(map, i, opcode)
-    end)
-  end
 end

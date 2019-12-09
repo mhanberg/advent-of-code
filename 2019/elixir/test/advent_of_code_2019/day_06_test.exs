@@ -13,7 +13,7 @@ defmodule AdventOfCode2019.Day06Test do
 
   test "part2" do
     input = Utils.input_to_list("day_06_example-2.txt")
-    result = part2(input, "YOU", "SAN")
+    result = part2(input)
 
     assert result == 4
   end
