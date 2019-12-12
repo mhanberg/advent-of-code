@@ -23,9 +23,6 @@ defmodule Vm do
   end
 
   def handle_continue(:execute, state) do
-    # this makes it work??? fuck me
-    IO.inspect(:continuing)
-
     traversed = execute(state)
 
     new_state = Map.merge(state, traversed)
@@ -34,10 +31,17 @@ defmodule Vm do
   end
 
   def handle_info({:add_inputs, inputs}, state) do
-    {:noreply, %{state | inputs: state.inputs ++ inputs}, {:continue, :execute}}
+    new_state = %{state | inputs: state.inputs ++ List.wrap(inputs)}
+
+    if state.halted? do
+      {:noreply, %{new_state | halted?: false}, {:continue, :execute}}
+    else
+      {:noreply, new_state}
+    end
   end
 
   defp execute(state) do
+
     state.program[state.pos]
     |> to_string()
     |> String.pad_leading(5, "0")
@@ -60,7 +64,12 @@ defmodule Vm do
 
       {3, mode, _, _} ->
         if Enum.empty?(state.inputs) do
-          state
+          send(state.main_thread, {:get_current_panel_color, self()})
+
+          %{
+            state
+            | halted?: true
+          }
         else
           [input | rest] = state.inputs
 
@@ -80,9 +89,12 @@ defmodule Vm do
       {4, mode, _, _} ->
         [{_, operand}] = get_operands(state, 1, [mode], [])
 
-        with pid when is_pid(pid) <- Process.whereis(state.neighbor) do
-          send(pid, {:add_inputs, [operand]})
-        end
+        if state.neighbor != nil,
+          do:
+            if(is_pid(state.neighbor),
+              do: send(state.neighbor, {:add_inputs, [operand]}),
+              else: send(Process.whereis(state.neighbor), {:add_inputs, [operand]})
+            )
 
         execute(%{
           state
@@ -113,16 +125,18 @@ defmodule Vm do
       {9, mode, _, _} ->
         [{_, operand}] = get_operands(state, 1, [mode], [])
 
+        new_base = (state.relative_base + operand)
+
         execute(%{
           state
           | pos: state.pos + 2,
-            relative_base: state.relative_base + operand
+            relative_base: new_base
         })
 
       {99, _, _, _} ->
         if state.name == :e, do: send(state.main_thread, state.outputs)
 
-        %{state | halted?: true}
+        state
     end
   end
 
@@ -161,10 +175,12 @@ defmodule Vm do
     state.program[state.relative_base + parameter] || 0
   end
 
-  def write_position(state, parameter, 0) do
+  # position
+  def write_position(_state, parameter, 0) do
     parameter
   end
 
+  # relative
   def write_position(state, parameter, 2) do
     state.relative_base + parameter
   end
@@ -195,4 +211,12 @@ defmodule Vm do
 
   def interpret_modes(modes),
     do: modes |> String.split("", trim: true) |> Enum.reverse() |> Enum.map(&String.to_integer/1)
+
+  def parse(args) do
+    args
+    |> Enum.with_index()
+    |> Enum.reduce(Map.new(), fn {opcode, i}, map ->
+      Map.put(map, i, opcode)
+    end)
+  end
 end

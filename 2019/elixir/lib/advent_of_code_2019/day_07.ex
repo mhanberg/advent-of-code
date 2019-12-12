@@ -4,10 +4,14 @@ defmodule AdventOfCode2019.Day07 do
 
     for perm <- perms(Enum.to_list(0..4)), into: [] do
       Enum.reduce(perm, 0, fn phase, last_output ->
-        # this doesn't actually work with day 5's and it also doesn't work with vm.ex for part 2
-        {_, [output]} = AdventOfCode2019.Day05.traverse_codes(program, 0, [phase, last_output], [])
+        Vm.start_link(:e, program, [phase, last_output], [], nil, self())
 
-        output
+        receive do
+          [output] ->
+           GenServer.stop(:e)
+
+           output 
+        end
       end)
     end
     |> Enum.max()
@@ -26,7 +30,7 @@ defmodule AdventOfCode2019.Day07 do
       end
 
       receive do
-        output ->
+        output when not is_tuple(output) ->
           Enum.each([:a, :b, :c, :d, :e], &GenServer.stop/1)
 
           output 

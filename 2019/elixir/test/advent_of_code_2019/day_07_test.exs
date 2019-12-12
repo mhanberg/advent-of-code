@@ -3,7 +3,6 @@ defmodule AdventOfCode2019.Day07Test do
 
   import AdventOfCode2019.Day07
 
-  @tag :skip
   test "part1" do
     input = [3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0]
     result = part1(input)

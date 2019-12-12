@@ -5,7 +5,7 @@ defmodule AdventOfCode2019.Day09Test do
 
   test "part1" do
     input = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
-    result = part1(input) |> IO.inspect(charlists: :as_lists) |> Enum.reverse
+    result = part1(input) |> Enum.reverse
 
     assert result == input
 
