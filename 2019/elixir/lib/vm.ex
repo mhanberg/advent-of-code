@@ -41,7 +41,6 @@ defmodule Vm do
   end
 
   defp execute(state) do
-
     state.program[state.pos]
     |> to_string()
     |> String.pad_leading(5, "0")
@@ -64,7 +63,7 @@ defmodule Vm do
 
       {3, mode, _, _} ->
         if Enum.empty?(state.inputs) do
-          send(state.main_thread, {:get_current_panel_color, self()})
+          send(state.main_thread, {:request_input, self()})
 
           %{
             state
@@ -89,12 +88,13 @@ defmodule Vm do
       {4, mode, _, _} ->
         [{_, operand}] = get_operands(state, 1, [mode], [])
 
-        if state.neighbor != nil,
-          do:
-            if(is_pid(state.neighbor),
-              do: send(state.neighbor, {:add_inputs, [operand]}),
-              else: send(Process.whereis(state.neighbor), {:add_inputs, [operand]})
-            )
+        if state.neighbor != nil do
+          if is_pid(state.neighbor) do
+            send(state.neighbor, {:add_inputs, [operand]})
+          else
+            send(Process.whereis(state.neighbor), {:add_inputs, [operand]})
+          end
+        end
 
         execute(%{
           state
@@ -125,7 +125,7 @@ defmodule Vm do
       {9, mode, _, _} ->
         [{_, operand}] = get_operands(state, 1, [mode], [])
 
-        new_base = (state.relative_base + operand)
+        new_base = state.relative_base + operand
 
         execute(%{
           state
