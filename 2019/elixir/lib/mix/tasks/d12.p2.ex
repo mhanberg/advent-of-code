@@ -5,13 +5,23 @@ defmodule Mix.Tasks.D12.P2 do
 
   @shortdoc "Day 12 Part 2"
   def run(args) do
-    input = nil
-
     if Enum.member?(args, "-b"),
-      do: Benchee.run(%{part_2: fn -> input |> part2() end}),
+      do:
+        Benchee.run(%{
+          part_2: fn ->
+            part2(
+              [{-8, 0}, {-11, 0}, {8, 0}, {-2, 0}],
+              [{-18, 0}, {-14, 0}, {-3, 0}, {-16, 0}],
+              [{6, 0}, {4, 0}, {-10, 0}, {1, 0}]
+            )
+          end
+        }),
       else:
-        input
-        |> part2()
+        part2(
+          [{-8, 0}, {-11, 0}, {8, 0}, {-2, 0}],
+          [{-18, 0}, {-14, 0}, {-3, 0}, {-16, 0}],
+          [{6, 0}, {4, 0}, {-10, 0}, {1, 0}]
+        )
         |> IO.inspect(label: "Part 2 Results")
   end
 end

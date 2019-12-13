@@ -23,4 +23,12 @@ defmodule Utils do
     |> Enum.map(&String.trim/1)
     |> Enum.map(mapper)
   end
+
+  # greatest common denominator
+  def gcd(a, b) when a == b, do: a
+  def gcd(a, b) when a > b, do: gcd(a - b, b)
+  def gcd(a, b) when a < b, do: gcd(a, b - a)
+
+  # least common multiple
+  def lcm(a, b), do: div(a * b, gcd(a, b))
 end
