@@ -2,9 +2,22 @@ defmodule Vm do
   use GenServer
 
   def start_link(name, program, inputs, outputs, neighbor, main_thread) do
-    GenServer.start_link(__MODULE__, {program, inputs, outputs, neighbor, name, main_thread},
-      name: name
+    opts =
+      if name == nil do
+        []
+      else
+        [name: name]
+      end
+
+    GenServer.start_link(
+      __MODULE__,
+      {program, inputs, outputs, neighbor, name, main_thread},
+      opts
     )
+  end
+
+  def stop(server) do
+    GenServer.stop(server)
   end
 
   def init({program, inputs, outputs, neighbor, name, main_thread}) do
@@ -134,7 +147,7 @@ defmodule Vm do
         })
 
       {99, _, _, _} ->
-        if state.name == :e, do: send(state.main_thread, state.outputs)
+        send(state.main_thread, state.outputs)
 
         state
     end
