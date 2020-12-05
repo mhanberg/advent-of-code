@@ -1,4 +1,12 @@
 defmodule Utils do
+  defmacro range(start, last) do
+    for int <- start..last do
+      quote do
+        string(unquote(to_string(int)))
+      end
+    end
+  end
+
   def input_to_ints(file) do
     file
     |> input_to_list()
