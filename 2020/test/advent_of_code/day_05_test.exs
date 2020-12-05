@@ -3,12 +3,8 @@ defmodule AdventOfCode.Day05Test do
 
   import AdventOfCode.Day05
 
-  @tag :skip
   test "part1" do
-    input = nil
-    result = part1(input)
-
-    assert result
+    assert part1(input1()) == 820
   end
 
   @tag :skip
@@ -17,5 +13,14 @@ defmodule AdventOfCode.Day05Test do
     result = part2(input)
 
     assert result
+  end
+
+  def input1 do
+    """
+    FBFBBFFRLR
+    BFFFBBFRRR
+    FFFBBBFRRR
+    BBFFBBFRLL
+    """
   end
 end
