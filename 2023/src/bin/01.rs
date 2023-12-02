@@ -38,7 +38,6 @@ pub fn part_two(input: &str) -> Option<i32> {
             .filter(|line| line.len() > 0)
             .map(|line| -> i32 {
                 let first = left.find(line).unwrap().as_str();
-                dbg!(first);
                 let reversed: String = line.chars().rev().collect();
                 let last = right
                     .find(&reversed)
@@ -47,7 +46,6 @@ pub fn part_two(input: &str) -> Option<i32> {
                     .chars()
                     .rev()
                     .collect::<String>();
-                dbg!(last.clone());
                 let replacer = |caps: &Captures| match &caps[0] {
                     "one" => "1",
                     "two" => "2",
@@ -60,7 +58,13 @@ pub fn part_two(input: &str) -> Option<i32> {
                     "nine" => "9",
                     _ => panic!(),
                 };
-                format!("{}{}", conv.replace(first, replacer), conv.replace(&last, replacer)).parse::<i32>().unwrap()
+                format!(
+                    "{}{}",
+                    conv.replace(first, replacer),
+                    conv.replace(&last, replacer)
+                )
+                .parse::<i32>()
+                .unwrap()
             })
             .sum(),
     )
