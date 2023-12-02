@@ -14,4 +14,7 @@ doctest = false
 test_lib = []
 
 [dependencies]
+cargo-nextest = "0.9.63"
 pico-args = "0.5.0"
+regex = "1.10.2"
+tap = "1.0.1"
